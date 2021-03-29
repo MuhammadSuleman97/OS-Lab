@@ -1,10 +1,12 @@
-#include  <stdio.h>
-#include  <sys/types.h>
+#include <stdio.h>
+#include <sys/types.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <fcntl.h>
+#include <unistd.h>
 
 #define MAX_INPUT_SIZE 1024
 #define MAX_TOKEN_SIZE 64
@@ -30,7 +32,10 @@ char **tokenize(char *line)
 	strcpy(tokens[tokenNo++], token);
 	tokenIndex = 0; 
       }
-    } else {
+      
+    } 
+    
+    else {
       token[tokenIndex++] = readChar;
     }
   }
@@ -46,6 +51,7 @@ char **multi_tokenize(char *line)
   char **multi_tokens = (char **)malloc(MAX_NUM_TOKENS * sizeof(char *));
   char *multi_token = (char *)malloc(MAX_TOKEN_SIZE * sizeof(char));
   int i, tokenIndex = 0, tokenNo = 0;
+  
   for(i =0; i < strlen(line); i++){
 
     char readChar = line[i];
@@ -90,6 +96,11 @@ void printDir()
 // Function where the system command is executed 
 void execution(char** tokens) 
 { 
+    char* filename;
+    int fd;	
+    int i=0;
+    
+	
     // Forking a child 
     pid_t PID; 
     
@@ -98,10 +109,58 @@ void execution(char** tokens)
     if (PID == -1) { 
         printf("\nUnable to fork a child !"); 
         return; 
-        
-    } else if (PID == 0) { 
+  
+       
+    } 
+    
+    else if (PID == 0) {
+    	while (tokens[++i]){
+    	 
+    		if(!strcmp(tokens[i], ">")){
+    			if(tokens[i+1]){ // There must be filename at "i+1" position (Only valid case)
+    				fd=open(tokens[i+1], O_WRONLY | O_TRUNC | O_CREAT, S_IRWXU);
+ 	   			if (fd==-1){
+ 	   				printf("\nShell: could not create the file");
+ 	   				return;
+ 	   			}
+ 	   			dup2(fd,STDOUT_FILENO);
+ 	   			close(fd);
+ 	   			tokens[i]=NULL; //considering  the ">" sign as Null
+ 	   			break; 
+ 	   		}
+ 	   		
+    			else if(tokens[i+2]){ // cant use space in filename
+    				printf("\nShell: wrong filename");
+    				return;
+    			}
+ 	   		else
+ 	   			printf("\nShell: Missing filename");
+ 	   		}
+ 
+    		else if(!strcmp(tokens[i], "<")){
+  			if(tokens[i+1]){ //// There must be filename at "i+1" position (Only valid case)
+    				fd=open(tokens[i+1], O_RDONLY);
+ 	   			if (fd==-1){
+ 	   				printf("\nShell: could not create file");
+ 	   				return;
+ 	   			}
+ 	   			dup2(fd,STDIN_FILENO);
+ 	   			close(fd);
+ 	   			tokens[i]=NULL; //considering  the ">" sign as Null
+ 	   			break;  
+    			}
+    			else if(tokens[i+2]){ //cant use space in filename 
+    				printf("\nShell: wrong filename");
+    				return;
+    			}
+  
+    			else
+ 	   			printf("\nShell: Missing filename");
+ 	   	}
+ 	}
+  
         if (execvp(tokens[0], tokens) < 0) { 
-            printf("\nUnable to execute command !"); 
+            printf("\nShell: Incorrect Command"); 
         } 
         exit(0); 
         
@@ -116,7 +175,8 @@ void execution(char** tokens)
 
  
 int main(int argc, char* argv[]) {
-	char  line[MAX_INPUT_SIZE]; 
+	char  line[MAX_INPUT_SIZE];
+	char  hist[MAX_INPUT_SIZE]=""; 
 	char **multi_tokens;           
 	char  **tokens;              
 	int i;
@@ -148,7 +208,18 @@ int main(int argc, char* argv[]) {
 		
 		/* END: TAKING INPUT */
 		
-		line[strlen(line)] = '\n'; //terminate with new line
+		
+		if(line[0]=='!' && line[1]=='!' && line[2]=='\0'){
+			if(hist[0]=='\0'){
+				printf("No Commands in History");
+				continue;
+				}
+			strcpy(line, hist);
+			printf("%s\n", line);
+		}
+		
+		line[strlen(line)] = '\n'; //terminate as new line comes
+		strcpy(hist, line);
 		
 		if (line[strlen(line)-2] == '&'){
 			printf( "pid = %d" ,getpid());
