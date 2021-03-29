@@ -6,4 +6,6 @@ You just need to compile the C program with gcc my_shell.c -o my_shell and then 
 It will show the directory you are present in e.g. cwd
 It also implements multiple functions written in singe line using '&'
 and returns its pid using getpid().
+The History function has been added in my_shell, what it does is provides the last command using "!!"
+The I/O redirect function has been added recently. 
 
