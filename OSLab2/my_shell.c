@@ -116,7 +116,7 @@ void execution(char** tokens)
     else if (PID == 0) {
     	while (tokens[++i]){
     	 
-    		if(!strcmp(tokens[i], ">")){
+    		if(strcmp(tokens[i], ">")==0){
     			if(tokens[i+1]){ // There must be filename at "i+1" position (Only valid case)
     				fd=open(tokens[i+1], O_WRONLY | O_TRUNC | O_CREAT, S_IRWXU);
  	   			if (fd==-1){
@@ -137,7 +137,7 @@ void execution(char** tokens)
  	   			printf("\nShell: Missing filename");
  	   		}
  
-    		else if(!strcmp(tokens[i], "<")){
+    		else if(strcmp(tokens[i], "<")==0){
   			if(tokens[i+1]){ //// There must be filename at "i+1" position (Only valid case)
     				fd=open(tokens[i+1], O_RDONLY);
  	   			if (fd==-1){
