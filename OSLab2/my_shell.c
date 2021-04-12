@@ -241,7 +241,11 @@ int main(int argc, char* argv[]) {
 				
 			}
 			}
-		
+		if (!(strncmp(tokens[0], "exit", 4) && strncmp(tokens[0], "quit", 4))) {
+
+			flag = 1;
+			break;
+		}
 		for(int j=0;tokens[j]!=NULL;j++){
 			free(tokens[j]);
 		}
@@ -251,7 +255,11 @@ int main(int argc, char* argv[]) {
 			free(multi_tokens[i]);
 		}
 		free(multi_tokens);
+                if (flag == 1) {
 
+		printf("\nThank You... Closing Shell...\n");
+		exit(0);
+	}
 	}
 	return 0;
 }
