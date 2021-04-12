@@ -235,17 +235,32 @@ int main(int argc, char* argv[]) {
 			tokens = tokenize(multi_tokens[i]);
 			
        		if (tokens[0][0] == 'c' && tokens[0][1] == 'd')
-				chdir(tokens[1]);	
+				chdir(tokens[1]);
+				
+			else if (!(strncmp(tokens[0], "exit", 4) )) {
+				
+				for (int j = 0; tokens[j] != NULL; j++) {
+            			free(tokens[j]);
+        			}
+        			free(tokens);
+
+        			for (int i = 0; multi_tokens[i] != NULL; i++) {
+            			free(multi_tokens[i]);
+        			}    
+        			free(multi_tokens);
+        			kill(0, SIGTERM);
+                		exit(0);
+				
+			}
+	
+				
 			else
 				execution(tokens);
 				
+			
 			}
 			}
-		if (!(strncmp(tokens[0], "exit", 4) && strncmp(tokens[0], "quit", 4))) {
-
-			flag = 1;
-			break;
-		}
+		
 		for(int j=0;tokens[j]!=NULL;j++){
 			free(tokens[j]);
 		}
@@ -255,11 +270,7 @@ int main(int argc, char* argv[]) {
 			free(multi_tokens[i]);
 		}
 		free(multi_tokens);
-                if (flag == 1) {
-
-		printf("\nThank You... Closing Shell...\n");
-		exit(0);
-	}
+               
 	}
 	return 0;
 }
