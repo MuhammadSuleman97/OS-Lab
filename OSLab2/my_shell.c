@@ -171,7 +171,7 @@ void execution(char** tokens)
 }
 
 
-void execution_multi(char ** tokens) {
+void execution_multi(char ** tokens) { // This function executes command in background and prints PID of child
 
     pid_t Pid;
     Pid = fork();
@@ -241,7 +241,7 @@ int main(int argc, char* argv[]) {
 		line[strlen(line)] = '\n'; //terminate as new line comes
 		strcpy(hist, line);
 		
-		if (line[strlen(line)-2] == '&'){
+		if (line[strlen(line)-2] == '&'){ // if a command ends with &
 			line[strlen(line) - 2] = '\n';
             		line[strlen(line) - 1] = '\0';
             		execution_multi(tokenize(line));
@@ -251,9 +251,9 @@ int main(int argc, char* argv[]) {
 			
 		}
 		
-		if (strlen(line) == 1)
+		if (strlen(line) == 1) // if no command is entered return shell
 			continue;
-		multi_tokens = multi_tokenize(line);
+		multi_tokens = multi_tokenize(line); // tokenizing line based on &
 		
 		for(i = 0; multi_tokens[i] != NULL;i++){
 			if (strlen(multi_tokens[i]) == 1)
