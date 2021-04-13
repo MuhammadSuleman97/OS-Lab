@@ -1,12 +1,14 @@
+
+
 #include <stdio.h>
 #include <sys/types.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
-#include <sys/types.h>
 #include <sys/wait.h>
-#include <fcntl.h>
 #include <unistd.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+
 
 #define MAX_INPUT_SIZE 1024
 #define MAX_TOKEN_SIZE 64
@@ -27,17 +29,17 @@ char **tokenize(char *line)
 
     if (readChar == ' ' || readChar == '\n' || readChar == '\t'){
       token[tokenIndex] = '\0';
-      if (tokenIndex != 0){
-	tokens[tokenNo] = (char*)malloc(MAX_TOKEN_SIZE*sizeof(char));
-	strcpy(tokens[tokenNo++], token);
-	tokenIndex = 0; 
+    	if (tokenIndex != 0){
+		tokens[tokenNo] = (char*)malloc(MAX_TOKEN_SIZE*sizeof(char));
+		strcpy(tokens[tokenNo++], token);
+		tokenIndex = 0; 
       }
       
     } 
     
-    else {
+    else 
       token[tokenIndex++] = readChar;
-    }
+    
   }
  
   free(token);
@@ -45,41 +47,38 @@ char **tokenize(char *line)
   return tokens;
 }
 
-
-char **multi_tokenize(char *line)
-{
-  char **multi_tokens = (char **)malloc(MAX_NUM_TOKENS * sizeof(char *));
-  char *multi_token = (char *)malloc(MAX_TOKEN_SIZE * sizeof(char));
-  int i, tokenIndex = 0, tokenNo = 0;
-  
-  for(i =0; i < strlen(line); i++){
-
-    char readChar = line[i];
-
-    if (readChar == '&' || readChar == '\n'){
-    	if ( readChar == '\n' ){
-    		multi_token[tokenIndex++] = '\n';
-    		multi_token[tokenIndex] = '\0';
-    	}
-    	else
-      		multi_token[tokenIndex] = '\0';
-      if (tokenIndex != 0){
-	multi_tokens[tokenNo] = (char*)malloc(MAX_TOKEN_SIZE*sizeof(char));
-	strcpy(multi_tokens[tokenNo++], multi_token);
-	tokenIndex = 0; 
-      }
-    } else {
-      multi_token[tokenIndex++] = readChar; 
+char ** multi_tokenize(char * line) {
+    char ** multi_tokens = (char ** ) malloc(MAX_NUM_TOKENS * sizeof(char * ));
+    char * multi_token = (char * ) malloc(MAX_TOKEN_SIZE * sizeof(char));
+    int i, tokenIndex = 0, tokenNo = 0;
+    for (i = 0; i < strlen(line); i++) {
+        char readChar = line[i];
+        if (readChar == '&' || readChar == '\n') {
+            if (readChar == '\n') {
+                multi_token[tokenIndex++] = '\n';
+                multi_token[tokenIndex] = '\0';
+            }
+            else if (readChar == '&') {
+                multi_token[tokenIndex++] = ' ';
+                multi_token[tokenIndex++] = '&';
+                multi_token[tokenIndex] = '\0';
+            }
+            else
+                multi_token[tokenIndex] = '\0';
+            if (tokenIndex != 0) {
+                multi_tokens[tokenNo] = (char * ) malloc(MAX_TOKEN_SIZE * sizeof(char));
+                strcpy(multi_tokens[tokenNo++], multi_token);
+                tokenIndex = 0;
+            }
+        }
+        else
+            multi_token[tokenIndex++] = readChar;
     }
-  }
- 
-  free(multi_token);
-  multi_tokens[tokenNo] = NULL ;
-  return multi_tokens;
+
+    free(multi_token);
+    multi_tokens[tokenNo] = NULL;
+    return multi_tokens;
 }
-
-
-
   
 // Function to print Current Directory. 
 void printDir() 
@@ -172,6 +171,27 @@ void execution(char** tokens)
 }
 
 
+void execution_multi(char ** tokens) {
+
+    pid_t Pid;
+    Pid = fork();
+    // Forking a child
+    if (Pid == -1) {
+        printf("\nShell: Unable to fork a child");
+        return;
+    }
+    else if (Pid == 0) {
+
+        if (execvp(tokens[0], tokens) < 0) {
+            printf("\nShell: Incorrect command\n");
+        }
+        exit(0);
+    }
+    else { // No waiting this time for child to terminate
+        printf("Pid: %d", Pid);
+        return;
+    }
+}
 
  
 int main(int argc, char* argv[]) {
@@ -222,8 +242,15 @@ int main(int argc, char* argv[]) {
 		strcpy(hist, line);
 		
 		if (line[strlen(line)-2] == '&'){
-			printf( "pid = %d" ,getpid());
+			line[strlen(line) - 2] = '\n';
+            		line[strlen(line) - 1] = '\0';
+            		execution_multi(tokenize(line));
+            		continue; // return shell
+        
+	
+			
 		}
+		
 		if (strlen(line) == 1)
 			continue;
 		multi_tokens = multi_tokenize(line);
