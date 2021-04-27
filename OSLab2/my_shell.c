@@ -264,8 +264,8 @@ int main(int argc, char* argv[]) {
        		if (tokens[0][0] == 'c' && tokens[0][1] == 'd')
 				chdir(tokens[1]);
 				
-			else if (!(strncmp(tokens[0], "exit", 4) )) {
-				
+			else if (!(strncmp(tokens[0], "exit", 4) )) {//when exit command is entered 
+				//free alloted memory
 				for (int j = 0; tokens[j] != NULL; j++) {
             			free(tokens[j]);
         			}
