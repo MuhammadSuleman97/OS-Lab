@@ -3,7 +3,7 @@
 #include <math.h>
 #include <stdlib.h>
 
-int i         = 0,num = 0, PointsInCircle  = 0;
+int i = 0,num = 0, PointsInCircle  = 0;
 
 void *count(void *arg)
 { 
@@ -17,15 +17,16 @@ void *count(void *arg)
             PointsInCircle++;
         }
     }
-    return NULL;
+   
+    pthread_exit(0);
 }
 
 int main()
 {
    
     pthread_t thread;
-	
-	printf("Enter a positive number of points: \n");
+    
+    printf("Enter a positive number of points: ");
     scanf("%d", &num); 
   
     pthread_create(&thread, NULL, &count, NULL);
