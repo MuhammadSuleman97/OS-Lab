@@ -1,4 +1,4 @@
-/* MONTE CARLO (No waiting by parent thread)  */ 
+/* Fibonacci Sequence (No waiting by parent thread)  */ 
 
 #include <pthread.h>
 #include <stdio.h>
