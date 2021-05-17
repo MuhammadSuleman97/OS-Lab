@@ -1,6 +1,6 @@
-4_24.c = Monte Carlo | 
-Compiling = gcc 4_24.c -lpthread -o 4_24 |
-load = ./4_24 |
+4_24.c = Monte Carlo -----
+Compiling = gcc 4_24.c -lpthread -o 4_24 -----
+load = ./4_24 -----
 
 
 4_27.c = Fibonacci Sequence | 
