@@ -1,4 +1,3 @@
-
 #include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -17,6 +16,7 @@ void *fib(void *arg){
 	  	first=second;
 	  	second=third;
 	}
+	pthread_exit(0);
 }
 
 
