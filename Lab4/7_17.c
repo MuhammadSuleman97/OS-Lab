@@ -1,3 +1,5 @@
+/* MONTE CARLO (Mutex Lock Multi-threading) */
+
 #include <stdio.h>
 #include <pthread.h>
 #include <math.h>
