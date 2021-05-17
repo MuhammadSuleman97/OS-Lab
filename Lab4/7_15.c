@@ -1,3 +1,4 @@
+/* MONTE CARLO (No waiting by parent thread)  */ 
 
 #include <pthread.h>
 #include <stdio.h>
