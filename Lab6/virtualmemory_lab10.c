@@ -83,9 +83,7 @@ int findPage(int logicalAddress, char* PageTable, struct TLB *tlb,  char* PM, in
 	unsigned char offset;
 	unsigned char pageNum;
 	bool TLBhit = false;
-	int frame = 0;
-	int value;
-	int newFrame = 0;
+	
 
 
        // printing the logical address of  page
@@ -106,7 +104,9 @@ int findPage(int logicalAddress, char* PageTable, struct TLB *tlb,  char* PM, in
 		}
 			
 	}
-
+        int frame = 0;
+	int value;
+	int newFrame = 0;
 	//Check if in PageTable does not contain the page we want 
 	if (TLBhit == false){
 		if (PageTable[pageNum] != -1){
