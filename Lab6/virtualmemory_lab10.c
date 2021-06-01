@@ -95,6 +95,7 @@ int findPage(int logicalAddress, char* PageTable, struct TLB *tlb,  char* PM, in
 
 	
 	//checking if the tlb has the page present 
+	int frame = 0;
 	int i = 0;
 	for (i; i < TLB_SIZE; i++){
 		if(tlb->TLBpage[i] == pageNum){
@@ -104,19 +105,20 @@ int findPage(int logicalAddress, char* PageTable, struct TLB *tlb,  char* PM, in
 		}
 			
 	}
-        int frame = 0;
+        
 	int value;
 	int newFrame = 0;
-	//Check if in PageTable does not contain the page we want 
+	//Check if TLB does not contain the page we want 
 	if (TLBhit == false){
+		//check if page table doesnot contain the page we want 
 		if (PageTable[pageNum] != -1){
 		//	printf("Pagehit");
 		}
 
-		//in case of page fault here 
+		
 	
 		else{
-	
+	        //in case of page fault here 
 			newFrame = reading_Disk(pageNum, PM, OF);
 			PageTable[pageNum] = newFrame;
 			(*pageFaults)++;
