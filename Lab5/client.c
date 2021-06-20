@@ -6,6 +6,7 @@
 #include <unistd.h>
 #include "threadpool.h"
 #include <time.h>
+
 struct data
 {
     int a;
@@ -19,41 +20,67 @@ void add(void *param) {
     printf("I add two values %d and %d result = %d\n",temp->a, temp->b, temp->a + temp->b);
 }
 
+void sub(void *param) {
+    struct data *temp;
+    temp = (struct data*)param;
+
+    printf("I subtract two values %d and %d result = %d\n",temp->a, temp->b, temp->a - temp->b);
+}
+
+void mul(void *param) {
+    struct data *temp;
+    temp = (struct data*)param;
+
+    printf("I multiply two values %d and %d result = %d\n",temp->a, temp->b, temp->a * temp->b);
+}
+
+void div(void *param) {
+    struct data *temp;
+    temp = (struct data*)param;
+
+    printf("I divide two values %d and %d result = %d\n",temp->a, temp->b, temp->a / temp->b);
+}
+
+void mod(void *param) {
+    struct data *temp;
+    temp = (struct data*)param;
+
+    printf("I take modulus of two values %d and %d result = %d\n",temp->a, temp->b, temp->a % temp->b);
+}
+
+
 int main(void)
 {
     // create some work to do
     struct data work;
-    work.a = 5;
-    work.b = 10;
 
+    //addition a+b
+    work.a = 10;
+    work.b = 5;
     // initialize the thread pool
     pool_init();
     // submit the work to the queue
     pool_submit(&add,&work);
 
     sleep(2);
-    work.a = 10;
-    work.b = 10;
-    pool_submit(&add,&work);
-    sleep(2);
-    work.a = 15;
-    work.b = 10;
-    pool_submit(&add,&work);
+
+    //Subtraction a-b
+    pool_submit(&sub,&work);
 
     sleep(2);
-    work.a = 5;
-    work.b = 20;
-    pool_submit(&add,&work);
-    sleep(2);
 
-    work.a = 30;
-    work.b = 10;
-    pool_submit(&add,&work);
+    //Multiply a*b
+    pool_submit(&mul,&work);
 
     sleep(2);
-    work.a = 50;
-    work.b = 10;
-    pool_submit(&add,&work);
+
+    //Divide a/b
+    pool_submit(&div,&work);
+
+    sleep(2);
+
+    // Modulo a%b
+    pool_submit(&mod,&work);
 
     sleep(2);
     pool_shutdown();
