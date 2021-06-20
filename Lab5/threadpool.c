@@ -8,110 +8,94 @@
 #include <semaphore.h>
 #include "threadpool.h"
 
-#define QUEUE_SIZE 10
 #define NUMBER_OF_THREADS 3
+void execute(void (*somefunction)(void *p), void *p);
 
-#define TRUE 1
+// Global Variables
+queue* Q;
+pthread_t bee[NUMBER_OF_THREADS];
+sem_t queue_check;
 
-// this represents work that has to be 
-// completed by a thread in the pool
+int shutdown = 0;
+// initializing the Queue
+void q_init(void) {
+    Q = malloc(sizeof(queue));
+    Q -> Front = Q -> Rear = malloc(sizeof(node));
+    Q -> Rear -> Next = NULL;
+}
 
-sem_t semqueue;
-
-typedef struct 
-{
-    void (*function)(void *p);
-    void *data;
-}task;
-
-task queue[QUEUE_SIZE];
-int queuenum = 0;
-int deqcurpos = 0;
-int enqcurpos = 0;
-
-// the work queue
-task worktodo;
-
-task enqwork;
-
-// the worker bee
-pthread_t bee1;
-pthread_t bee2;
-pthread_t bee3;
-
-int choosethread = 0;
-
-// insert a task into the queue
-// returns 0 if successful or 1 otherwise, 
-int enqueue(task t) 
-{
-    sem_wait(&semqueue);
-	if(queuenum > 10){
-		sem_post(&semqueue);
-		return 1;
-    }
-    queue[enqcurpos] = t;
-    queuenum ++;
-    enqcurpos = (enqcurpos + 1)%10;
-    sem_post(&semqueue);
+// returns 0 if successful or 1 otherwise,
+int enqueue(task t) {
+    node* tmp = malloc(sizeof(node));
+    Q->Rear->T = t;
+    Q->Rear->Next = tmp;
+    Q->Rear = tmp;
+    tmp->Next = NULL;
+    sem_post(&queue_check);
     return 0;
 }
 
 // remove a task from the queue
-task dequeue() 
-{
-    worktodo = queue[deqcurpos];
-    deqcurpos = (deqcurpos + 1)%10;
+task dequeue() {
+    node* tmp = Q -> Front;
+    task worktodo = tmp -> T;
+
+    Q -> Front = Q -> Front -> Next;
+    free(tmp);
+
     return worktodo;
 }
 
 // the worker thread in the thread pool
-void *worker(void *param)
-{
-    task newwork;
-    sem_wait(&semqueue);
-    if(queuenum != 0){
-		queuenum--;
-		newwork = dequeue();
-		(*newwork.function)(newwork.data);
-		//queuenum--;
+void *worker(void *param) {
+    task worktodo;
+    while(1){
+        sem_wait(&queue_check);
+        if(shutdown) break;
+        worktodo = dequeue();
+        execute(worktodo.function, worktodo.data);
     }
-    sem_post(&semqueue);
+    sem_post(&queue_check);
     pthread_exit(0);
 }
 
 /**
+ * Executes the task provided to the thread pool
+ */
+void execute(void (*somefunction)(void *p), void *p) {
+    (*somefunction)(p);
+}
+
+
+/**
  * Submits work to the pool.
  */
-int pool_submit(void (*somefunction)(void *p), void *p)
-{
-    enqwork.function = somefunction;
-    enqwork.data = p;
-    int eq = enqueue(enqwork);
+int pool_submit(void (*somefunction)(void *p), void *p) {
+    task worktodo;
 
-    if(choosethread  == 0){
-    	pthread_create(&bee1,NULL,worker,NULL);
-    }else if(choosethread == 1){
-		pthread_create(&bee2,NULL,worker,NULL);
-    }else if(choosethread == 2){
-		pthread_create(&bee3,NULL,worker,NULL);
-    }
-    choosethread = (choosethread + 1)%3;
+    worktodo.function = somefunction;
+    worktodo.data = p;
 
-    return eq;
+    enqueue(worktodo);
+    return 0;
 }
 
 // initialize the thread pool
-void pool_init(void)
-{
-    sem_init(&semqueue,0,1);
+void pool_init(void) {
+    int i = 0;
+    q_init();
+    sem_init(&queue_check, 0, 0);
+
+    for(i = 0; i < NUMBER_OF_THREADS; i++)
+        pthread_create(&bee[i],NULL,worker,NULL);
 }
 
 // shutdown the thread pool
-void pool_shutdown(void)
-{
-    pthread_join(bee1,NULL);
-    pthread_join(bee2,NULL);
-    pthread_join(bee3,NULL);
-}
+void pool_shutdown(void) {
+    int i;
+    shutdown = 1;
+    sem_post(&queue_check);
 
+    for(i = 0; i < NUMBER_OF_THREADS; i++)
+        pthread_join(bee[i],0);
+}
