@@ -141,12 +141,13 @@ int main (int argc, char* argv[]){
 //initializing page table
 	unsigned char PageTable[PAGE_TABLE_SIZE];
 	memset(PageTable, -1, sizeof(PageTable));
+	//every entrey of page table from 0-255 is initialized at -1
 
 
 //initializing TLB
     struct TLB tlb;
-	memset(tlb.pageNo, -1, sizeof(tlb.pageNo));
-	memset(tlb.frameNo, -1, sizeof(tlb.frameNo));
+	memset(tlb.pageNo, -1, sizeof(tlb.pageNo));      //setting frame numbers to -1 (16 enteries)
+	memset(tlb.frameNo, -1, sizeof(tlb.frameNo));     
 	tlb.ind = 0;
 
 //iniitalizng phyisical memory
