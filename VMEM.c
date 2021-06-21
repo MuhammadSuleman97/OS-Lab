@@ -22,6 +22,8 @@ struct TLB {                               //initializing TLB
 
 const int BUFFER_SIZE = 256;
 const int PHYS_MEM_SIZE = 256;                       //page frame size
+
+
 int read_Frame (int pageNumber, char *phys_Mem, int* openFrame){
 
 	char one_frame[BUFFER_SIZE];
@@ -43,6 +45,7 @@ int read_Frame (int pageNumber, char *phys_Mem, int* openFrame){
        // checking if the file has data available
 	if (fseek(fp, pageNumber * PHYS_MEM_SIZE, SEEK_SET)!=0)
 		printf("error in fseek() function \n");
+		
 // reading  256 bytes in available page frame
 	int i = 0;
 	for(i; i < PHYS_MEM_SIZE; i++){
@@ -55,7 +58,7 @@ int read_Frame (int pageNumber, char *phys_Mem, int* openFrame){
 
 
 
-int findPage(int LAddress, char* PageTable, struct TLB *tlb,  char* PM, int* openFrame, int* pageFaults, int* TLBhits){
+int findPage(int LAddress, char* PageTable, struct TLB *tlb,  char* phyMem, int* openFrame, int* pageFaults, int* TLBhits){
 
 	unsigned char bit_mask = 0xFF;   //used masking to bit_mask  upper 16 bytes
 	unsigned char offset;
@@ -94,7 +97,7 @@ int findPage(int LAddress, char* PageTable, struct TLB *tlb,  char* PM, int* ope
 		}
 		else{
 	        //in case of page fault here
-			newFrame = read_Frame(pageNum, PM, openFrame);
+			newFrame = read_Frame(pageNum, phyMem, openFrame);
 			PageTable[pageNum] = newFrame;
 			(*pageFaults)++;
 
@@ -106,7 +109,7 @@ int findPage(int LAddress, char* PageTable, struct TLB *tlb,  char* PM, int* ope
 
 	}
 	int index = ((unsigned char)frame*PHYS_MEM_SIZE)+offset;
-	value = *(PM+index);
+	value = *(phyMem+index);
 	printf("Physical address: %d\t Value: %d\n",index, value);
 
 	return 0;
@@ -141,13 +144,13 @@ int main (int argc, char* argv[]){
 
 
 //initializing TLB
-        struct TLB tlb;
+    struct TLB tlb;
 	memset(tlb.pageNo, -1, sizeof(tlb.pageNo));
 	memset(tlb.frameNo, -1, sizeof(tlb.frameNo));
 	tlb.ind = 0;
 
 //iniitalizng phyisical memory
-	char PhyMem[PHYS_MEM_SIZE][PHYS_MEM_SIZE];
+	char PhyMem[PHYS_MEM_SIZE][PHYS_MEM_SIZE]; //65,536 bytes (256 frames × 256-byte frame size)
 
     int inputCount = 0;
 	int v;
