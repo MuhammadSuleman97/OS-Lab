@@ -5,6 +5,9 @@ int simplefs_create(char *filename){
     /*
 	    Create file with name `filename` from disk
 	*/
+	simplefs_allocInode();
+	simplefs_readInode(int inodenum, struct inode_t *inodeptr);
+	simplefs_writeInode(int inodenum, struct inode_t *inodeptr);
     return -1;
 }
 
@@ -13,6 +16,8 @@ void simplefs_delete(char *filename){
     /*
 	    delete file with name `filename` from disk
 	*/
+	simplefs_freeDataBlock(int blocknum);
+	simplefs_freeInode(int inodenum);
 }
 
 int simplefs_open(char *filename){
